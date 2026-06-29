@@ -1,0 +1,30 @@
+=== EMG → SERVO LATENCY SESSION LOG ===
+Session start: 2025-10-15 15:48:44
+Arduino Port: COM3 @ 9600 baud
+Model: models/trained_model.h5
+-------------------------------------------
+
+[15:48:47] Gesture: index        | Latency: 0.063 s | Avg: 0.063 s | Trial #: 1
+[15:48:48] Gesture: fist         | Latency: 0.063 s | Avg: 0.063 s | Trial #: 1
+[15:48:50] Gesture: index        | Latency: 0.047 s | Avg: 0.055 s | Trial #: 2
+[15:48:51] Gesture: ok           | Latency: 0.062 s | Avg: 0.062 s | Trial #: 1
+[15:48:52] Gesture: wrist_up     | Latency: 0.062 s | Avg: 0.062 s | Trial #: 1
+[15:48:52] Gesture: fist         | Latency: 0.047 s | Avg: 0.055 s | Trial #: 2
+[15:48:55] Gesture: wrist_up     | Latency: 0.047 s | Avg: 0.054 s | Trial #: 2
+[15:48:56] Gesture: ok           | Latency: 0.047 s | Avg: 0.055 s | Trial #: 2
+[15:49:00] Gesture: fist         | Latency: 0.063 s | Avg: 0.058 s | Trial #: 3
+[15:49:01] Gesture: ok           | Latency: 0.047 s | Avg: 0.052 s | Trial #: 3
+[15:49:03] Gesture: fist         | Latency: 0.063 s | Avg: 0.059 s | Trial #: 4
+[15:49:05] Gesture: index        | Latency: 0.063 s | Avg: 0.058 s | Trial #: 3
+[15:49:06] Gesture: ring         | Latency: 0.063 s | Avg: 0.063 s | Trial #: 1
+[15:49:07] Gesture: ok           | Latency: 0.047 s | Avg: 0.051 s | Trial #: 4
+[15:49:08] Gesture: open         | Latency: 0.062 s | Avg: 0.062 s | Trial #: 1
+[15:49:09] Gesture: fist         | Latency: 0.063 s | Avg: 0.060 s | Trial #: 5
+[15:49:10] Gesture: index        | Latency: 0.063 s | Avg: 0.059 s | Trial #: 4
+[15:49:11] Gesture: ring         | Latency: 0.063 s | Avg: 0.063 s | Trial #: 2
+[15:49:12] Gesture: thumb        | Latency: 0.046 s | Avg: 0.046 s | Trial #: 1
+[15:49:14] Gesture: index        | Latency: 0.047 s | Avg: 0.057 s | Trial #: 5
+[15:49:16] Gesture: middle       | Latency: 0.063 s | Avg: 0.063 s | Trial #: 1
+[15:49:16] Gesture: ok           | Latency: 0.063 s | Avg: 0.053 s | Trial #: 5
+
+=== SESSION CLOSED ===

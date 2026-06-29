@@ -1,0 +1,19 @@
+=== SERVO ACTIVATION METRICS SESSION ===
+Session start: 2025-10-15 15:29:12
+Arduino: COM3 @ 9600
+------------------------------------------
+
+[15:29:14] Gesture recognized: open
+[15:29:15] Gesture recognized: ok
+[15:29:18] Gesture recognized: wrist_up
+[15:29:19] Gesture recognized: little
+[15:29:20] Gesture recognized: ring
+[15:29:23] Gesture recognized: relax
+[15:29:26] Gesture recognized: fist
+[15:29:28] Gesture recognized: index
+[15:29:30] Gesture recognized: middle
+[15:29:37] Gesture recognized: wrist_right
+[15:29:39] Gesture recognized: wrist_left
+[15:29:48] Gesture recognized: thumb
+
+=== SESSION CLOSED ===

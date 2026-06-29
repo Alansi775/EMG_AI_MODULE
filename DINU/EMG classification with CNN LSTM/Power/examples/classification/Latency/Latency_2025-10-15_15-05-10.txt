@@ -1,0 +1,61 @@
+=== EMG → SERVO LATENCY SESSION LOG ===
+Session start: 2025-10-15 15:05:10
+Arduino Port: COM3 @ 9600 baud
+Model: models/trained_model.h5
+-------------------------------------------
+
+[15:05:12] Gesture: ring         | Latency: 0.047 s | Avg: 0.047 s | Trial #: 1
+[15:05:13] Gesture: ok           | Latency: 0.063 s | Avg: 0.063 s | Trial #: 1
+[15:05:14] Gesture: middle       | Latency: 0.062 s | Avg: 0.062 s | Trial #: 1
+[15:05:15] Gesture: ok           | Latency: 0.047 s | Avg: 0.055 s | Trial #: 2
+[15:05:20] Gesture: ring         | Latency: 0.047 s | Avg: 0.047 s | Trial #: 2
+[15:05:22] Gesture: wrist_up     | Latency: 0.046 s | Avg: 0.046 s | Trial #: 1
+[15:05:23] Gesture: ok           | Latency: 0.046 s | Avg: 0.052 s | Trial #: 3
+[15:05:23] Gesture: little       | Latency: 0.062 s | Avg: 0.062 s | Trial #: 1
+[15:05:25] Gesture: ring         | Latency: 0.062 s | Avg: 0.052 s | Trial #: 3
+[15:05:26] Gesture: wrist_up     | Latency: 0.063 s | Avg: 0.054 s | Trial #: 2
+[15:05:27] Gesture: middle       | Latency: 0.046 s | Avg: 0.054 s | Trial #: 2
+[15:05:30] Gesture: index        | Latency: 0.047 s | Avg: 0.047 s | Trial #: 1
+[15:05:31] Gesture: wrist_right  | Latency: 0.047 s | Avg: 0.047 s | Trial #: 1
+[15:05:32] Gesture: index        | Latency: 0.063 s | Avg: 0.055 s | Trial #: 2
+[15:05:35] Gesture: little       | Latency: 0.062 s | Avg: 0.062 s | Trial #: 2
+[15:05:36] Gesture: ring         | Latency: 0.062 s | Avg: 0.055 s | Trial #: 4
+[15:05:38] Gesture: middle       | Latency: 0.063 s | Avg: 0.057 s | Trial #: 3
+[15:05:39] Gesture: index        | Latency: 0.063 s | Avg: 0.058 s | Trial #: 3
+[15:05:42] Gesture: ring         | Latency: 0.047 s | Avg: 0.053 s | Trial #: 5
+[15:05:42] Gesture: ok           | Latency: 0.047 s | Avg: 0.051 s | Trial #: 4
+[15:05:48] Gesture: fist         | Latency: 0.047 s | Avg: 0.047 s | Trial #: 1
+[15:05:54] Gesture: index        | Latency: 0.047 s | Avg: 0.055 s | Trial #: 4
+[15:05:57] Gesture: middle       | Latency: 0.046 s | Avg: 0.054 s | Trial #: 4
+[15:05:58] Gesture: ring         | Latency: 0.047 s | Avg: 0.052 s | Trial #: 6
+[15:06:00] Gesture: wrist_up     | Latency: 0.062 s | Avg: 0.057 s | Trial #: 3
+[15:06:03] Gesture: middle       | Latency: 0.047 s | Avg: 0.053 s | Trial #: 5
+[15:06:03] Gesture: little       | Latency: 0.062 s | Avg: 0.062 s | Trial #: 3
+[15:06:05] Gesture: wrist_right  | Latency: 0.063 s | Avg: 0.055 s | Trial #: 2
+[15:06:07] Gesture: wrist_left   | Latency: 0.063 s | Avg: 0.063 s | Trial #: 1
+[15:06:09] Gesture: relax        | Latency: 0.047 s | Avg: 0.047 s | Trial #: 1
+[15:06:12] Gesture: open         | Latency: 0.047 s | Avg: 0.047 s | Trial #: 1
+[15:06:13] Gesture: ok           | Latency: 0.047 s | Avg: 0.050 s | Trial #: 5
+[15:06:14] Gesture: middle       | Latency: 0.063 s | Avg: 0.055 s | Trial #: 6
+[15:06:18] Gesture: ok           | Latency: 0.063 s | Avg: 0.052 s | Trial #: 6
+[15:06:22] Gesture: middle       | Latency: 0.047 s | Avg: 0.053 s | Trial #: 7
+[15:06:23] Gesture: little       | Latency: 0.063 s | Avg: 0.062 s | Trial #: 4
+[15:06:27] Gesture: wrist_up     | Latency: 0.063 s | Avg: 0.058 s | Trial #: 4
+[15:06:28] Gesture: middle       | Latency: 0.047 s | Avg: 0.053 s | Trial #: 8
+[15:06:30] Gesture: index        | Latency: 0.047 s | Avg: 0.053 s | Trial #: 5
+[15:06:31] Gesture: relax        | Latency: 0.047 s | Avg: 0.047 s | Trial #: 2
+[15:06:33] Gesture: index        | Latency: 0.047 s | Avg: 0.052 s | Trial #: 6
+[15:06:34] Gesture: ring         | Latency: 0.047 s | Avg: 0.051 s | Trial #: 7
+[15:06:35] Gesture: thumb        | Latency: 0.062 s | Avg: 0.062 s | Trial #: 1
+[15:06:37] Gesture: index        | Latency: 0.063 s | Avg: 0.054 s | Trial #: 7
+[15:06:38] Gesture: ring         | Latency: 0.047 s | Avg: 0.051 s | Trial #: 8
+[15:06:39] Gesture: ok           | Latency: 0.047 s | Avg: 0.051 s | Trial #: 7
+[15:06:53] Gesture: fist         | Latency: 0.062 s | Avg: 0.055 s | Trial #: 2
+[15:06:55] Gesture: index        | Latency: 0.063 s | Avg: 0.055 s | Trial #: 8
+[15:06:56] Gesture: fist         | Latency: 0.047 s | Avg: 0.052 s | Trial #: 3
+[15:06:59] Gesture: middle       | Latency: 0.062 s | Avg: 0.054 s | Trial #: 9
+[15:06:59] Gesture: ok           | Latency: 0.063 s | Avg: 0.053 s | Trial #: 8
+[15:07:00] Gesture: ring         | Latency: 0.047 s | Avg: 0.050 s | Trial #: 9
+[15:07:05] Gesture: relax        | Latency: 0.063 s | Avg: 0.052 s | Trial #: 3
+
+=== SESSION CLOSED ===

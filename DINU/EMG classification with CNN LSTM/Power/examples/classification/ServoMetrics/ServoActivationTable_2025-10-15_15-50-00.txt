@@ -1,0 +1,11 @@
+=== SERVO ACTIVATION TABLE (1=Active/Closed, 0=Open/Relax) ===
+Generated: 2025-10-15 15:50:00
+
+Servo                 fist        open       thumb       index      middle        ring      little          ok       relax  wrist_left wrist_right
+--------------------------------------------------------------------------------------------------------------------------------------------------
+thumb                    1           0           1           0           0           0           0           1           0           0           0
+index                    1           0           0           1           0           0           0           1           0           0           0
+middle                   1           0           0           0           1           0           0           0           0           0           0
+ring                     1           0           0           0           0           1           0           0           0           0           0
+little                   1           0           0           0           0           0           1           0           0           0           0
+wrist                    0           0           0           0           0           0           0           0           0           1           1

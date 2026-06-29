@@ -1,0 +1,8 @@
+=== EMG → SERVO LATENCY SESSION LOG ===
+Session start: 2025-10-20 14:59:07
+Arduino Port: COM3 @ 9600 baud
+Model: models/trained_model.h5
+-------------------------------------------
+
+
+=== SESSION CLOSED ===
