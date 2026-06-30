@@ -1,5 +1,4 @@
-# realtime.py
-# Real-time gesture recognition using trained CNN+LSTM model
+# realtime.py — uses fixed normalization from training (matches exactly)
 
 import asyncio
 import myo
@@ -8,37 +7,28 @@ import torch
 import torch.nn as nn
 import numpy as np
 from scipy import signal
-from collections import deque
+from collections import deque, Counter
 import time
 
-# ── Config ──
 FS           = 200
-WIN_SAMPLES  = 40
+WIN_SAMPLES  = 150
 N_CHANNELS   = 8
 N_CLASSES    = 6
-CONFIDENCE_THRESHOLD = 0.70   # minimum confidence to show prediction
-SMOOTHING_WINDOW     = 5      # number of predictions to average
+CONFIDENCE_THRESHOLD = 0.70
+RAW_VOTE_HISTORY      = 5
+CONFIRM_VOTES_NEEDED  = 4
+STABILITY_ROUNDS      = 2
 
 GESTURE_NAMES = {
-    0: 'rest',
-    1: 'fist',
-    2: 'open_hand',
-    3: 'wave_in',
-    4: 'wave_out',
-    5: 'pinch',
+    0: 'rest', 1: 'fist', 2: 'open_hand',
+    3: 'wave_in', 4: 'wave_out', 5: 'pinch',
 }
-
 GESTURE_EMOJI = {
-    0: '😐',
-    1: '✊',
-    2: '🖐',
-    3: '👈',
-    4: '👉',
-    5: '🤌',
+    0: '😐', 1: '✊', 2: '🖐',
+    3: '👈', 4: '👉', 5: '🤌',
 }
 
 
-# ── Model (same architecture as training) ──
 class EMG_CNN_LSTM(nn.Module):
     def __init__(self, n_channels=8, n_classes=6):
         super().__init__()
@@ -70,29 +60,32 @@ class EMG_CNN_LSTM(nn.Module):
         return self.fc(x)
 
 
-# ── Load model ──
 DEVICE = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 model  = EMG_CNN_LSTM(n_classes=N_CLASSES).to(DEVICE)
 model.load_state_dict(torch.load('best_model_v4.pt', map_location=DEVICE))
 model.eval()
 print(f"✅ Model loaded — Device: {DEVICE}")
 
+# ── تحميل نفس إحصائيات التطبيع من التدريب — الإصلاح الأساسي ──
+NORM_MEAN = np.load('norm_mean.npy')
+NORM_STD  = np.load('norm_std.npy')
+print(f"✅ Normalization stats loaded (fixed, matches training)")
 
-# ── Filter (same as training) ──
 nyq    = FS / 2
 b,  a  = signal.butter(4, [20/nyq, 90/nyq], btype='band')
 bn, an = signal.iirnotch(50, Q=30, fs=FS)
 
 
-# ── Shared state ──
 class State:
-    # ring buffer — keeps last WIN_SAMPLES
-    emg_buffer       = deque(maxlen=WIN_SAMPLES)
-    raw_for_norm     = deque(maxlen=400)   # 2 seconds for normalization stats
-    pred_history     = deque(maxlen=SMOOTHING_WINDOW)
-    last_gesture     = -1
-    last_print_time  = 0
-    prediction_count = 0
+    emg_buffer        = deque(maxlen=WIN_SAMPLES)
+    pred_history       = deque(maxlen=RAW_VOTE_HISTORY)
+
+    confirmed_gesture  = 0
+    candidate_gesture  = None
+    candidate_count    = 0
+
+    last_print_time    = 0
+    prediction_count   = 0
 
 STATE = State()
 
@@ -101,27 +94,15 @@ def predict():
     if len(STATE.emg_buffer) < WIN_SAMPLES:
         return None, 0.0
 
-    # ── Preprocess ──
-    window = np.array(STATE.emg_buffer, dtype=np.float32)  # (40, 8)
-
-    # Filter
+    window = np.array(STATE.emg_buffer, dtype=np.float32)
     window = signal.filtfilt(b,  a,  window, axis=0)
     window = signal.filtfilt(bn, an, window, axis=0)
 
-    # Normalize using recent 2-second stats
-    if len(STATE.raw_for_norm) >= 40:
-        ref = np.array(STATE.raw_for_norm, dtype=np.float32)
-        mean = ref.mean(axis=0)
-        std  = np.where(ref.std(axis=0) < 1e-8, 1e-8, ref.std(axis=0))
-        window = (window - mean) / std
-    else:
-        mean = window.mean(axis=0)
-        std  = np.where(window.std(axis=0) < 1e-8, 1e-8, window.std(axis=0))
-        window = (window - mean) / std
+    # ── تطبيع ثابت — نفس الأرقام بالضبط اللي استُخدمت في التدريب ──
+    window = (window - NORM_MEAN) / NORM_STD
 
-    # ── Inference ──
-    x = torch.tensor(window.T, dtype=torch.float32)   # (8, 40)
-    x = x.unsqueeze(0).to(DEVICE)                     # (1, 8, 40)
+    window = window.T.copy()
+    x = torch.tensor(window, dtype=torch.float32).unsqueeze(0).to(DEVICE)
 
     with torch.no_grad():
         logits     = model(x)
@@ -132,50 +113,61 @@ def predict():
     return pred_label, confidence
 
 
+def send_to_actuator(gesture_label):
+    name = GESTURE_NAMES[gesture_label]
+    print(f"\n  🎯 ACTUATOR COMMAND → {name.upper()}\n")
+    # هنا تحط كود التحكم بالموتور/الدرون لاحقاً
+
+
 class RealtimeClassifier(myo.MyoClient):
 
     async def on_emg_data(self, emg: myo.EMGData):
         for sample in [emg.sample1, emg.sample2]:
             STATE.emg_buffer.append(list(sample))
-            STATE.raw_for_norm.append(list(sample))
 
         STATE.prediction_count += 1
-
-        # predict every 10 samples (50ms)
         if STATE.prediction_count % 10 != 0:
             return
 
         pred_label, confidence = predict()
-        if pred_label is None:
+        if pred_label is None or confidence < CONFIDENCE_THRESHOLD:
             return
 
-        # Smoothing — majority vote over last N predictions
         STATE.pred_history.append(pred_label)
-        if len(STATE.pred_history) < SMOOTHING_WINDOW:
+        if len(STATE.pred_history) < STATE.pred_history.maxlen:
             return
 
-        # Most common prediction in history
-        from collections import Counter
-        smoothed_label = Counter(STATE.pred_history).most_common(1)[0][0]
+        vote_counts = Counter(STATE.pred_history)
+        top_label, top_count = vote_counts.most_common(1)[0]
 
-        # Only print if changed or every 0.5 seconds
+        if top_count < CONFIRM_VOTES_NEEDED:
+            return
+
+        if top_label == STATE.confirmed_gesture:
+            STATE.candidate_gesture = None
+            STATE.candidate_count   = 0
+        elif top_label == STATE.candidate_gesture:
+            STATE.candidate_count += 1
+        else:
+            STATE.candidate_gesture = top_label
+            STATE.candidate_count   = 1
+
+        if STATE.candidate_count >= STABILITY_ROUNDS:
+            STATE.confirmed_gesture = STATE.candidate_gesture
+            STATE.candidate_gesture = None
+            STATE.candidate_count   = 0
+            send_to_actuator(STATE.confirmed_gesture)
+
         now = time.time()
-        changed = smoothed_label != STATE.last_gesture
-        timeout = (now - STATE.last_print_time) > 0.5
-
-        if (changed or timeout) and confidence >= CONFIDENCE_THRESHOLD:
-            emoji = GESTURE_EMOJI[smoothed_label]
-            name  = GESTURE_NAMES[smoothed_label]
-            conf_bar = '█' * int(confidence * 20)
-            print(f"\r  {emoji}  {name:<12}  "
-                  f"conf: {confidence:.0%}  [{conf_bar:<20}]   ",
+        if (now - STATE.last_print_time) > 0.3:
+            emoji = GESTURE_EMOJI[STATE.confirmed_gesture]
+            name  = GESTURE_NAMES[STATE.confirmed_gesture]
+            cand  = (f" (trying: {GESTURE_NAMES[STATE.candidate_gesture]} "
+                     f"{STATE.candidate_count}/{STABILITY_ROUNDS})"
+                     if STATE.candidate_gesture is not None else "")
+            print(f"\r  {emoji}  STATE: {name:<12} conf:{confidence:.0%}{cand}        ",
                   end='', flush=True)
-            STATE.last_gesture    = smoothed_label
             STATE.last_print_time = now
-
-        elif confidence < CONFIDENCE_THRESHOLD:
-            print(f"\r  ❓  low confidence ({confidence:.0%})                        ",
-                  end='', flush=True)
 
     async def on_imu_data(self, _): pass
     async def on_classifier_event(self, _): pass
@@ -187,17 +179,17 @@ class RealtimeClassifier(myo.MyoClient):
 
 async def main():
     print("\n" + "═" * 52)
-    print("  REAL-TIME EMG GESTURE RECOGNITION")
+    print("  REAL-TIME EMG — FIXED NORMALIZATION")
     print("═" * 52)
-    print(f"\n  Gestures: {list(GESTURE_NAMES.values())}")
-    print(f"  Confidence threshold: {CONFIDENCE_THRESHOLD:.0%}")
-    print(f"  Smoothing: {SMOOTHING_WINDOW} predictions\n")
+    print(f"\n  Window           : {WIN_SAMPLES} samples (~{WIN_SAMPLES/FS*1000:.0f}ms)")
+    print(f"  Confidence min   : {CONFIDENCE_THRESHOLD:.0%}")
+    print(f"  Raw vote history : {RAW_VOTE_HISTORY}  (need {CONFIRM_VOTES_NEEDED}+ agreeing)")
+    print(f"  Stability rounds : {STABILITY_ROUNDS}  (before actuator commits)\n")
     print("  🔍  Scanning for Myo Armband...")
 
     client = await RealtimeClassifier.with_device()
     print(f"  ✅  Connected: {client.device.name}\n")
-    print("  Put on the Myo and try the gestures!")
-    print("  Press Ctrl+C to stop.\n")
+    print("  Try the gestures! Press Ctrl+C to stop.\n")
     print("─" * 52)
 
     await client.setup(

@@ -1,5 +1,5 @@
-# train_v4.py
-# Correct windowing: no leakage between train and test
+# train.py
+# Fixed: global fixed normalization (matches realtime exactly)
 
 import numpy as np
 import pandas as pd
@@ -14,8 +14,8 @@ import seaborn as sns
 import os
 
 FS          = 200
-WIN_SAMPLES = 40
-STEP        = 20
+WIN_SAMPLES = 150
+STEP        = 75
 N_CHANNELS  = 8
 N_CLASSES   = 6
 BATCH_SIZE  = 128
@@ -48,9 +48,6 @@ def load_sessions(sessions_dir="sessions"):
 print("\nLoading sessions...")
 df = load_sessions()
 
-# ── أضف repetition_id لكل session ──
-# كل gesture + rest = block واحد
-# نعرّف الـ block بتغير الـ label
 df['block_id'] = (df['label'] != df['label'].shift()).cumsum()
 df['rep_group'] = df['session_id'].astype(str) + '_' + df['block_id'].astype(str)
 
@@ -58,46 +55,62 @@ print(f"Total: {len(df):,} samples")
 print(f"Total blocks: {df['block_id'].nunique()}\n")
 
 
-# ── Preprocessing per session ──
-def preprocess_by_session(df):
+# ── Preprocessing — GLOBAL fixed normalization (THE FIX) ──
+GLOBAL_STATS = {}
+
+def preprocess_global(df):
     EMG_COLS = [f'emg_{i}' for i in range(8)]
     emg_out  = np.zeros((len(df), 8), dtype=np.float32)
     nyq = FS / 2
-    b,  a  = signal.butter(4, [20/nyq, 90/nyq], btype='band')
+    bb, aa = signal.butter(4, [20/nyq, 90/nyq], btype='band')
     bn, an = signal.iirnotch(50, Q=30, fs=FS)
 
+    all_filtered = []
+
+    # فلترة كل جلسة على حدة (الفلتر يحتاج استمرارية الإشارة داخل الجلسة)
     for sid in df['session_id'].unique():
         mask = (df['session_id'] == sid).values
         emg  = df.loc[mask, EMG_COLS].values.astype(np.float32)
-        emg  = signal.filtfilt(b,  a,  emg, axis=0)
+        emg  = signal.filtfilt(bb, aa, emg, axis=0)
         emg  = signal.filtfilt(bn, an, emg, axis=0)
-        mean = emg.mean(axis=0)
-        std  = np.where(emg.std(axis=0) < 1e-8, 1e-8, emg.std(axis=0))
-        emg_out[mask] = (emg - mean) / std
+        emg_out[mask] = emg
+        all_filtered.append(emg)
+
+    # إحصائيات عامة ثابتة — من كل الداتا المفلترة مجتمعة
+    all_concat = np.concatenate(all_filtered, axis=0)
+    GLOBAL_STATS['mean'] = all_concat.mean(axis=0)
+    GLOBAL_STATS['std']  = np.where(
+        all_concat.std(axis=0) < 1e-8, 1e-8, all_concat.std(axis=0)
+    )
+
+    # تطبيع واحد ثابت لكل الداتا — نفس الإحصائيات بالضبط لكل sample
+    emg_out = (emg_out - GLOBAL_STATS['mean']) / GLOBAL_STATS['std']
 
     return emg_out
 
-print("Preprocessing...")
-emg_norm = preprocess_by_session(df)
+print("Preprocessing (global fixed normalization)...")
+emg_norm = preprocess_global(df)
 labels   = df['label'].values.astype(np.int64)
 blocks   = df['block_id'].values
 
+# ── احفظ الإحصائيات فوراً — realtime.py سيستخدم نفس الأرقام بالضبط ──
+np.save('norm_mean.npy', GLOBAL_STATS['mean'])
+np.save('norm_std.npy',  GLOBAL_STATS['std'])
+print(f"  Saved norm_mean.npy / norm_std.npy")
+print(f"  Mean: {GLOBAL_STATS['mean']}")
+print(f"  Std : {GLOBAL_STATS['std']}\n")
 
-# ── Windowing per block — THE FIX ──
-# نعمل windowing داخل كل block بشكل منفصل
-# هكذا لا يوجد window يتشارك samples بين train و test
 
-def extract_windows_per_block(emg, labels, blocks,
-                               win=WIN_SAMPLES, step=STEP):
+# ── Windowing per block — no leakage ──
+def extract_windows_per_block(emg, labels, blocks, win=WIN_SAMPLES, step=STEP):
     X, y, block_ids = [], [], []
     unique_blocks = np.unique(blocks)
 
     for bid in unique_blocks:
-        mask   = blocks == bid
-        e_blk  = emg[mask]
-        l_blk  = labels[mask]
+        mask  = blocks == bid
+        e_blk = emg[mask]
+        l_blk = labels[mask]
 
-        # تأكد أن الـ block نظيف (label واحد فقط)
         if len(np.unique(l_blk)) != 1:
             continue
         lbl = l_blk[0]
@@ -123,10 +136,7 @@ for lbl, name in GESTURE_NAMES.items():
     print(f"  {name:12s} [{lbl}]: {count:5d} windows")
 
 
-# ── Split على مستوى الـ Block لا الـ Window ──
-# كل block إما كله في Train أو كله في Test
-# هذا يمنع أي تداخل
-
+# ── Split — كل label موجود بالـ test ──
 np.random.seed(42)
 
 train_blocks_list = []
@@ -150,7 +160,6 @@ X_test,  y_test  = X[test_mask],  y[test_mask]
 print(f"\nTrain: {len(X_train):,} windows  |  Test: {len(X_test):,} windows")
 print(f"Train blocks: {len(train_blocks)}  |  Test blocks: {len(test_blocks)}")
 
-# تحقق من توزيع الـ classes
 print("\nClass distribution in test:")
 for lbl, name in GESTURE_NAMES.items():
     count = (y_test == lbl).sum()
@@ -215,7 +224,7 @@ criterion = nn.CrossEntropyLoss(
 )
 
 print("\n" + "=" * 52)
-print("  TRAINING  v4  —  No Data Leakage")
+print("  TRAINING — Global Fixed Normalization")
 print("=" * 52)
 
 best_acc, best_epoch = 0.0, 0
@@ -274,7 +283,7 @@ with torch.no_grad():
 
 names = [GESTURE_NAMES[i] for i in range(N_CLASSES)]
 print("\n" + "=" * 52)
-print("  CLASSIFICATION REPORT  v4")
+print("  CLASSIFICATION REPORT")
 print("=" * 52)
 print(classification_report(all_true, all_preds, target_names=names))
 
@@ -282,7 +291,7 @@ cm = confusion_matrix(all_true, all_preds)
 plt.figure(figsize=(8, 6))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
             xticklabels=names, yticklabels=names)
-plt.title(f'Confusion Matrix v4 — Best Acc: {best_acc:.3f}')
+plt.title(f'Confusion Matrix — Best Acc: {best_acc:.3f}')
 plt.ylabel('True'); plt.xlabel('Predicted')
 plt.tight_layout()
 plt.savefig('confusion_matrix_v4.png', dpi=150)
@@ -296,3 +305,4 @@ plt.tight_layout()
 plt.savefig('training_curves_v4.png', dpi=150)
 
 print("  Saved: confusion_matrix_v4.png  |  training_curves_v4.png")
+print("  Saved: norm_mean.npy  |  norm_std.npy")
