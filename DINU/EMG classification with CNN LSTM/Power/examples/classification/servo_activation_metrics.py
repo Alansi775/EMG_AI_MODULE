@@ -18,7 +18,7 @@ ARDUINO_PORT = 'COM3'
 BAUDRATE = 115200
 try:
     arduino = serial.Serial(ARDUINO_PORT, BAUDRATE, timeout=0, write_timeout=0)
-    arduino_status = "✅ Connected"
+    arduino_status = " Connected"
 except Exception:
     arduino = None
     arduino_status = "⚠️ Not Connected"
@@ -246,7 +246,7 @@ def realtime_thread(ui_set_status, ui_set_gesture, emg_buffer, model, label_enco
 # ---------- GUI ----------
 def start_gui():
     myo.init(sdk_path=r"C:\\Users\\ThinkCentre\\Desktop\\Power\\myo_sdk")
-    myo_status = "✅ Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
+    myo_status = " Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
 
     # Load model
     model, label_encoder = None, None

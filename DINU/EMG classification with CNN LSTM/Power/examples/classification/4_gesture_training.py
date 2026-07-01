@@ -23,7 +23,7 @@ ARDUINO_PORT = 'COM3'
 BAUDRATE = 9600
 try:
     arduino = serial.Serial(ARDUINO_PORT, BAUDRATE, timeout=1)
-    arduino_status = "✅ Connected"
+    arduino_status = " Connected"
 except Exception:
     arduino = None
     arduino_status = "⚠️ Not Connected"
@@ -39,7 +39,7 @@ servo_config = {
 }
 
 gesture_emojis = {
-    'fist': '✊', 'open': '🖐️', 'thumb': '👍', 'index': '☝️',
+    'fist': '', 'open': '️', 'thumb': '👍', 'index': '☝️',
     'middle': '🖕', 'ring': '💍', 'little': '🤙', 'ok': '👌',
     'wrist_left': '↩️', 'wrist_right': '↪️', 'wrist_up': '⬆️',
     'wrist_down': '⬇️', 'relax': '😌',
@@ -150,7 +150,7 @@ def recorder_thread(update_text, ask_user, emg_buffer, model, label_encoder, met
 # ---------------- GUI ----------------
 def start_gui():
     myo.init(sdk_path=r'C:\\Users\\ThinkCentre\\Desktop\\Power\\myo_sdk')
-    myo_status = "✅ Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
+    myo_status = " Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
 
     MODEL_DIR = "models"
     MODEL_FILE = next((os.path.join(MODEL_DIR,f)
@@ -159,7 +159,7 @@ def start_gui():
     if not MODEL_FILE: raise FileNotFoundError("No trained_model found in /models")
 
     META_FILE = os.path.join(MODEL_DIR, "metadata.pkl")
-    print(f"✅ Loading model from: {MODEL_FILE}")
+    print(f" Loading model from: {MODEL_FILE}")
     model = load_model(MODEL_FILE, custom_objects={'add_pos_encoding': add_pos_encoding})
     with open(META_FILE, "rb") as f: metadata = pickle.load(f)
     label_encoder = metadata.get("label_encoder")
@@ -201,7 +201,7 @@ def start_gui():
         def save_to(name):
             folder=os.path.join("data",name)
             path=save_emg_csv(captured,folder)
-            messagebox.showinfo("Saved",f"✅ Saved 5 s EMG to {path}")
+            messagebox.showinfo("Saved",f" Saved 5 s EMG to {path}")
         def manual_select():
             win=tk.Toplevel(root); win.title("Select Correct Gesture")
             ttk.Label(win,text="Select correct gesture:",font=("Segoe UI",12)).pack(pady=5)

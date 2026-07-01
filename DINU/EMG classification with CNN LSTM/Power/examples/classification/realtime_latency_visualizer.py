@@ -16,7 +16,7 @@ arduino = None
 arduino_status = "⚠️ Not Connected"
 try:
     arduino = serial.Serial(ARDUINO_PORT, BAUDRATE, timeout=0.05)
-    arduino_status = "✅ Connected"
+    arduino_status = " Connected"
 except Exception:
     pass
 
@@ -48,7 +48,7 @@ gesture_to_angles = {
 }
 
 gesture_emojis = {
-    'fist': '✊', 'open': '🖐️', 'thumb': '👍', 'index': '☝️', 'middle': '🖕',
+    'fist': '', 'open': '️', 'thumb': '👍', 'index': '☝️', 'middle': '🖕',
     'ring': '💍', 'little': '🤙', 'ok': '👌', 'relax': '😌',
     'wrist_left': '↩️', 'wrist_right': '↪️',
 }
@@ -164,7 +164,7 @@ def send_gesture_command(gesture_name):
 # ---------------- Inference thread ----------------
 def inference_loop(gui_cb, status_cb, stop_ev):
     myo.init(sdk_path=r'C:\\Users\\ThinkCentre\\Desktop\\Power\\myo_sdk')
-    myo_status = "✅ Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
+    myo_status = " Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
     status_cb(f"Myo: {myo_status} | Arduino: {arduino_status}")
 
     MODEL_DIR = "models"

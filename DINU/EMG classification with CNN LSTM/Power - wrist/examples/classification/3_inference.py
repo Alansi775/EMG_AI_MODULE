@@ -12,7 +12,7 @@ BAUDRATE = 9600
 
 try:
     arduino = serial.Serial(ARDUINO_PORT, BAUDRATE, timeout=1)
-    print(f"✅ Connected to Arduino on {ARDUINO_PORT}")
+    print(f" Connected to Arduino on {ARDUINO_PORT}")
 except Exception as e:
     print(f"⚠️ Could not connect to Arduino: {e}")
     arduino = None

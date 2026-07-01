@@ -15,7 +15,7 @@ ARDUINO_PORT = 'COM3'
 BAUDRATE = 9600
 try:
     arduino = serial.Serial(ARDUINO_PORT, BAUDRATE, timeout=1)
-    arduino_status = "✅ Connected"
+    arduino_status = " Connected"
 except Exception as e:
     arduino = None
     arduino_status = "⚠️ Not Connected"
@@ -46,8 +46,8 @@ gesture_to_angles = {
 }
 
 gesture_emojis = {
-    'fist': '✊',
-    'open': '🖐️',
+    'fist': '',
+    'open': '️',
     'thumb': '👍',
     'index': '☝️',
     'middle': '🖕',
@@ -145,7 +145,7 @@ def inference_thread(update_text, emg_buffer, model, label_encoder, metadata, st
 # ---------------- GUI ----------------
 def start_gui():
     myo.init(sdk_path=r'C:\Users\ThinkCentre\Desktop\Power\myo_sdk')
-    myo_status = "✅ Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
+    myo_status = " Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
 
     MODEL_FILE, META_FILE = 'models/trained_model.keras', 'models/metadata.pkl'
     model = load_model(MODEL_FILE)

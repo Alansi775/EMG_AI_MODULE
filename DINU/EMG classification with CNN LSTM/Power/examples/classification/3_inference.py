@@ -20,7 +20,7 @@ ARDUINO_PORT = 'COM3'
 BAUDRATE = 9600
 try:
     arduino = serial.Serial(ARDUINO_PORT, BAUDRATE, timeout=1)
-    arduino_status = "✅ Connected"
+    arduino_status = " Connected"
 except Exception:
     arduino = None
     arduino_status = "⚠️ Not Connected"
@@ -51,7 +51,7 @@ gesture_to_angles = {
 }
 
 gesture_emojis = {
-    'fist': '✊', 'open': '🖐️', 'thumb': '👍', 'index': '☝️', 'middle': '🖕',
+    'fist': '', 'open': '️', 'thumb': '👍', 'index': '☝️', 'middle': '🖕',
     'ring': '💍', 'little': '🤙', 'ok': '👌',
     'wrist_left': '↩️', 'wrist_right': '↪️',
     'relax': '😌',
@@ -158,13 +158,13 @@ def inference_thread_with_pause(update_text, emg_buffer, model, label_encoder, m
 # ---------------- GUI ----------------
 def start_gui():
     myo.init(sdk_path=r'C:\\Users\\ThinkCentre\\Desktop\\Power\\myo_sdk')
-    myo_status = "✅ Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
+    myo_status = " Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
 
     MODEL_DIR = "models"
     MODEL_FILE = os.path.join(MODEL_DIR, "trained_model.h5")
     META_FILE = os.path.join(MODEL_DIR, "metadata.pkl")
 
-    print(f"✅ Loading model from: {MODEL_FILE}")
+    print(f" Loading model from: {MODEL_FILE}")
     model = load_model(MODEL_FILE, custom_objects={'add_pos_encoding': add_pos_encoding})
     with open(META_FILE, "rb") as f:
         metadata = pickle.load(f)

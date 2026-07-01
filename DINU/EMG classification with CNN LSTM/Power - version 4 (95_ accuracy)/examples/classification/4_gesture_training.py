@@ -16,7 +16,7 @@ ARDUINO_PORT = 'COM3'
 BAUDRATE = 9600
 try:
     arduino = serial.Serial(ARDUINO_PORT, BAUDRATE, timeout=1)
-    arduino_status = "✅ Connected"
+    arduino_status = " Connected"
 except Exception as e:
     arduino = None
     arduino_status = "⚠️ Not Connected"
@@ -49,8 +49,8 @@ gesture_to_angles = {
 
 # ================== Emojis ==================
 gesture_emojis = {
-    'fist': '✊',
-    'open': '🖐️',
+    'fist': '',
+    'open': '️',
     'thumb': '👍',
     'index': '☝️',
     'middle': '🖕',
@@ -262,7 +262,7 @@ def recording_thread(update_text, update_question, emg_buffer, model, label_enco
                     captured_matrix = None
                     current_gesture = None
                     stable_start_t = None
-                    update_question(f"✅ Saved to {path}")
+                    update_question(f" Saved to {path}")
                     return True
                 except Exception as e:
                     update_question(f"⚠️ Save error: {e}")
@@ -293,7 +293,7 @@ def recording_thread(update_text, update_question, emg_buffer, model, label_enco
 def start_gui():
     # ---- Init Myo / Model ----
     myo.init(sdk_path=r'C:\Users\ThinkCentre\Desktop\Power\myo_sdk')
-    myo_status = "✅ Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
+    myo_status = " Connected" if ConnectionChecker().ok else "⚠️ Not Connected"
 
     MODEL_FILE, META_FILE = 'models/trained_model.keras', 'models/metadata.pkl'
     model = load_model(MODEL_FILE)
@@ -337,7 +337,7 @@ def start_gui():
     q_frame.pack(pady=6)
     q_label = ttk.Label(q_frame, textvariable=question_var, font=("Segoe UI", 12))
     q_label.grid(row=0, column=0, padx=10)
-    yes_btn = ttk.Button(q_frame, text="✅ Yes")
+    yes_btn = ttk.Button(q_frame, text=" Yes")
     no_btn  = ttk.Button(q_frame, text="❌ No")
     yes_btn.grid(row=0, column=1, padx=6)
     no_btn.grid(row=0, column=2, padx=6)
